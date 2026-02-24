@@ -46,25 +46,28 @@ function cellClickHandler (row, col) {
 
     board[row][col] = currentPlayer;
     renderSymbolInCell(currentPlayer, row, col);
-    
 
     const hasWinner = checkForWinner(currentPlayer);
     if (hasWinner) {
-        hasWinner.cell.array.forEach(([row, col]) => {
-            renderSymbolInCell(currentPlayer, row, col, 'red')
+        hasWinner.forEach(([r, c]) => {
+            renderSymbolInCell(currentPlayer, r, c, 'red');
         });
-        alert(`Победитель: ${currentPlayer}`)
+        alert(`Победитель: ${currentPlayer}`);
+        gameOnGoing = false;  
+        return;               
     }
-    if (board.flat().every(field => field !== EMPTY)) {
-        alert("Победила дружба");
+
+    if (board.flat().every(cell => cell !== EMPTY)) {
+        alert('Победила дружба');
         gameOnGoing = false;
         return;
     }
 
-    currentPlayer = currentPlayer == CROSS ? ZERO : CROSS;
+    currentPlayer = currentPlayer === CROSS ? ZERO : CROSS;
 
     console.log(`Clicked on cell: ${row}, ${col}`);
 }
+
 
 function checkForWinner (player) {
     const size = boardSize;
@@ -94,7 +97,6 @@ function checkForWinner (player) {
 
     return null;
 }
-
 
 function renderSymbolInCell (symbol, row, col, color = '#333') {
     const targetCell = findCell(row, col);
