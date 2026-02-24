@@ -4,11 +4,24 @@ const EMPTY = ' ';
 
 const container = document.getElementById('fieldWrapper');
 
+let board = [];
+let boardSize = 3;
+let currentPlayer = CROSS;
+let gameOnGoing = true;
+
 startGame();
 addResetListener();
 
-function startGame () {
-    renderGrid(3);
+function startGame() {
+    renderGrid(boardSize);
+    initBoard(boardSize);
+}
+
+function initBoard(dimension) {
+    boardSize = dimension;
+    board = Array.from({ length: boardSize }, () => Array(boardSize).fill(EMPTY));
+    currentPlayer = CROSS;
+    gameOnGoing = true;
 }
 
 function renderGrid (dimension) {
@@ -27,14 +40,61 @@ function renderGrid (dimension) {
 }
 
 function cellClickHandler (row, col) {
-    // Пиши код тут
+    if (board[row][col] !== EMPTY || !gameOnGoing) {
+        return;
+    }
+
+    board[row][col] = currentPlayer;
+    renderSymbolInCell(currentPlayer, row, col);
+    
+
+    const hasWinner = checkForWinner(currentPlayer);
+    if (hasWinner) {
+        hasWinner.cell.array.forEach(([row, col]) => {
+            renderSymbolInCell(currentPlayer, row, col, 'red')
+        });
+        alert(`Победитель: ${currentPlayer}`)
+    }
+    if (board.flat().every(field => field !== EMPTY)) {
+        alert("Победила дружба");
+        gameOnGoing = false;
+        return;
+    }
+
+    currentPlayer = currentPlayer == CROSS ? ZERO : CROSS;
+
     console.log(`Clicked on cell: ${row}, ${col}`);
-
-
-    /* Пользоваться методом для размещения символа в клетке так:
-        renderSymbolInCell(ZERO, row, col);
-     */
 }
+
+function checkForWinner (player) {
+    const size = boardSize;
+
+    for (let r = 0; r < size; r++) {
+        if (board[r].every(cell => cell === player)) {
+            return Array.from({ length: size }, (_, c) => [r, c]);
+        }
+    }
+
+    for (let c = 0; c < size; c++) {
+        const column = board.map(row => row[c]);
+        if (column.every(cell => cell === player)) {
+            return Array.from({ length: size }, (_, r) => [r, c]);
+        }
+    }
+
+    const mainDiagonal = board.map((row, i) => row[i]);
+    if (mainDiagonal.every(cell => cell === player)) {
+        return Array.from({ length: size }, (_, i) => [i, i]);
+    }
+
+    const secondaryDiagonal = board.map((row, i) => row[size - 1 - i]);
+    if (secondaryDiagonal.every(cell => cell === player)) {
+        return Array.from({ length: size }, (_, i) => [i, size - 1 - i]);
+    }
+
+    return null;
+}
+
 
 function renderSymbolInCell (symbol, row, col, color = '#333') {
     const targetCell = findCell(row, col);
@@ -55,6 +115,7 @@ function addResetListener () {
 
 function resetClickHandler () {
     console.log('reset!');
+    startGame();
 }
 
 
